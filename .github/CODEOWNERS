@@ -1,0 +1,15 @@
+# CODEOWNERS file
+
+# This file defines who is responsible for code review and approval
+
+#
+
+# Only krprashantpk can approve PRs for all branches
+
+# To enforce this on develop and main branches, configure branch protection rules in GitHub:
+
+# Settings > Branches > Branch protection rules > Require review from Code Owners
+
+# All files in the repository require approval from krprashantpk
+
+- @krprashantpk
