@@ -1,13 +1,7 @@
 from __future__ import annotations
 
-import asyncio
-import concurrent.futures
-import json
 import logging
-import threading
-from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator, Sequence
-from contextlib import contextmanager, asynccontextmanager
+from collections.abc import Callable
 from datetime import datetime, timezone, timedelta
 from typing import (
     TYPE_CHECKING,
@@ -17,7 +11,6 @@ from typing import (
     Optional,
     TypedDict,
     TypeVar,
-    cast,
 )
 
 try:
@@ -26,10 +19,7 @@ except ImportError:
     orjson = None  # type: ignore
 
 from azure.cosmos.aio import CosmosClient as AsyncCosmosClient
-from azure.cosmos import CosmosClient, PartitionKey
-from azure.cosmos import exceptions as cosmos_exceptions
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
+from azure.cosmos import CosmosClient
 
 # LangGraph store base types
 try:
@@ -42,15 +32,8 @@ except ImportError:
 
 if TYPE_CHECKING:
     from langgraph.store.base import (
-        GetOp,
-        IndexConfig,
         Item,
-        ListNamespacesOp,
-        Op,
-        PutOp,
-        Result,
         SearchItem,
-        SearchOp,
         TTLConfig,
     )
 

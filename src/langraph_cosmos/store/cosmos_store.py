@@ -1,23 +1,13 @@
 from __future__ import annotations
 
-import asyncio
 import concurrent.futures
-import json
 import logging
 import threading
-from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator, Sequence
-from contextlib import contextmanager, asynccontextmanager
-from datetime import datetime, timezone, timedelta
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
 from typing import (
-    TYPE_CHECKING,
     Any,
-    Generic,
-    Literal,
     Optional,
-    TypedDict,
-    TypeVar,
-    cast,
 )
 
 try:
@@ -25,11 +15,8 @@ try:
 except ImportError:
     orjson = None  # type: ignore
 
-from azure.cosmos.aio import CosmosClient as AsyncCosmosClient
 from azure.cosmos import CosmosClient, PartitionKey
 from azure.cosmos import exceptions as cosmos_exceptions
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
 
 # LangGraph store base types
 try:
@@ -43,15 +30,11 @@ except ImportError:
 
 from langgraph.store.base import (
         GetOp,
-        IndexConfig,
         Item,
         ListNamespacesOp,
-        Op,
         PutOp,
-        Result,
         SearchItem,
-        SearchOp,
-        TTLConfig)
+        SearchOp)
 
 from .base import BaseCosmosStore, CosmosIndexConfig
 
@@ -393,8 +376,8 @@ class CosmosStore(BaseCosmosStore[CosmosClient]):
         # Namespace filter
         if namespace_prefix:
             partition_key = self._get_partition_key(namespace_prefix)
-            conditions.append(f"STARTSWITH(c.namespace, @namespace)")
-            conditions.append(f"c.partition_key = @partition_key")
+            conditions.append("STARTSWITH(c.namespace, @namespace)")
+            conditions.append("c.partition_key = @partition_key")
             query_params.append({"name": "@namespace", "value": namespace_str})
             query_params.append({"name": "@partition_key", "value": partition_key})
         
@@ -427,7 +410,7 @@ class CosmosStore(BaseCosmosStore[CosmosClient]):
                 "name": "@query_embedding",
                 "value": query_embedding
             })
-            query_parts.append(f"ORDER BY VectorDistance(c.embedding, @query_embedding, false)")
+            query_parts.append("ORDER BY VectorDistance(c.embedding, @query_embedding, false)")
         else:
             query_parts.append("ORDER BY c.updated_at DESC")
             query_parts.append(f"OFFSET {offset} LIMIT {limit}")

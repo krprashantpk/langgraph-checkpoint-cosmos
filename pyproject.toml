@@ -1,7 +1,7 @@
 [project]
 name = "langraph-cosmos"
 version = "0.1.0"
-description = "Add your description here"
+description = "Library with a Cosmos DB implementation of LangGraph checkpoint saver."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -9,9 +9,6 @@ dependencies = [
     "azure-identity>=1.25.1",
     "langgraph>=1.0.5",
 ]
-
-[project.scripts]
-langraph-checkpoint-cosmos = "langraph_checkpoint_cosmos:main"
 
 [build-system]
 requires = ["hatchling"]
