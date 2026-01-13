@@ -1,33 +1,25 @@
-name: Release
+name: Release & Publish
 
 on:
-  push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
-      - "v[0-9]+.[0-9]+.[0-9]+-*"
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag version (e.g., v1.0.0 or v1.0.0-rc1)'
+        description: "Tag version (e.g., v1.0.0 or v1.0.0-rc1)"
         required: true
-        type: string
-
-permissions:
-  contents: write
-  id-token: write
 
 jobs:
-  build-and-release:
+  release:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write  # required for creating tags and releases
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # required for tagging
 
       - name: Validate tag format
-        if: github.event_name == 'workflow_dispatch'
         run: |
           TAG="${{ github.event.inputs.tag }}"
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-.*)?$ ]]; then
@@ -36,44 +28,38 @@ jobs:
           fi
           echo "Tag format validated: $TAG"
 
-      - name: Create and push tag
-        if: github.event_name == 'workflow_dispatch'
+      - name: Install uv
         run: |
-          TAG="${{ github.event.inputs.tag }}"
+          curl -Ls https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Configure Git
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push tag
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          enable-cache: true
-
-      - name: Build package
-        run: uv build
-
-      - name: Extract tag name
-        id: get_version
+      - name: Build package with uv
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          fi
+          uv build
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: Release ${{ steps.get_version.outputs.VERSION }}
-          draft: false
-          prerelease: ${{ contains(steps.get_version.outputs.VERSION, '-') }}
-          generate_release_notes: true
-          files: |
-            dist/*.whl
-            dist/*.tar.gz
+      - name: Create GitHub Release with notes and artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --generate-notes \
+            dist/*
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
+      - name: Publish to PyPI with uv
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          uv publish
