@@ -5,36 +5,12 @@ import logging
 import threading
 from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
-from typing import (
-    Any,
-    Optional,
-)
+from typing import (Any,Optional)
 
-try:
-    import orjson
-except ImportError:
-    orjson = None  # type: ignore
 
 from azure.cosmos import CosmosClient, PartitionKey
 from azure.cosmos import exceptions as cosmos_exceptions
-
-# LangGraph store base types
-try:
-    from langgraph.store.base import BaseStore
-except ImportError:
-    # Fallback if langgraph is not installed
-    class BaseStore:  # type: ignore
-        """Fallback BaseStore interface if langgraph is not installed."""
-        supports_ttl: bool = False
-
-
-from langgraph.store.base import (
-        GetOp,
-        Item,
-        ListNamespacesOp,
-        PutOp,
-        SearchItem,
-        SearchOp)
+from langgraph.store.base import (GetOp,Item,ListNamespacesOp,PutOp,SearchItem,SearchOp)
 
 from .base import BaseCosmosStore, CosmosIndexConfig
 

@@ -1,3 +1,3 @@
-from ._async_store import AsyncCosmosStore
+from ._async_store import CosmosStore
 
-__all__ = ["AsyncCosmosStore"]
+__all__ = ["CosmosStore"]

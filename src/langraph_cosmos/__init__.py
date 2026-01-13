@@ -1,3 +1,3 @@
-from .checkpoint import checkpoint
-from .store import store
-__all__ = ["checkpoint", "store"]
+from . import store, checkpoint
+
+__all__ = ["store", "checkpoint"]

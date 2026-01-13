@@ -5,32 +5,20 @@ import logging
 from collections.abc import Callable, Iterable
 from contextlib import asynccontextmanager
 from typing import (
-    TYPE_CHECKING,
     Any,
     Optional,
 )
-
-try:
-    import orjson
-except ImportError:
-    orjson = None  # type: ignore
-
 from azure.cosmos.aio import CosmosClient as AsyncCosmosClient
 from azure.cosmos import PartitionKey
 from azure.cosmos import exceptions as cosmos_exceptions
-
-if TYPE_CHECKING:
-    from langgraph.store.base import (
-        Item,
-        SearchItem,
-    )
+from langgraph.store.base import (Item,SearchItem)
 
 from ..base import BaseCosmosStore, CosmosIndexConfig
 
 logger = logging.getLogger(__name__)
 
 
-class AsyncCosmosStore(BaseCosmosStore[AsyncCosmosClient]):
+class CosmosStore(BaseCosmosStore[AsyncCosmosClient]):
     """Async Cosmos DB-backed store with optional vector search.
     
     Similar to CosmosStore but with async/await support for all operations.
@@ -38,7 +26,7 @@ class AsyncCosmosStore(BaseCosmosStore[AsyncCosmosClient]):
     Example:
         ```python
         from azure.cosmos.aio import CosmosClient
-        from store.cosmos.base import AsyncCosmosStore
+        from store.cosmos.base import CosmosStore
         
         async def main():
             client = CosmosClient(
@@ -46,7 +34,7 @@ class AsyncCosmosStore(BaseCosmosStore[AsyncCosmosClient]):
                 credential="your-key"
             )
             
-            store = AsyncCosmosStore(
+            store = CosmosStore(
                 client=client,
                 database_name="my_database",
                 container_name="my_container"
@@ -118,7 +106,7 @@ class AsyncCosmosStore(BaseCosmosStore[AsyncCosmosClient]):
             ttl: TTL configuration
             
         Yields:
-            AsyncCosmosStore instance
+            CosmosStore instance
         """
         client = AsyncCosmosClient.from_connection_string(connection_string)
         try:
