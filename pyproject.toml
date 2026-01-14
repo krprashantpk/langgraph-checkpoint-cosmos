@@ -1,6 +1,6 @@
 [project]
 name = "langraph-cosmos"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Library with a Cosmos DB implementation of LangGraph checkpoint saver."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -11,11 +11,15 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling","hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/langraph_cosmos"]
+
+[tool.hatch.version]
+source = "vcs"
+tag-pattern = "v(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+(-.*)?)"
 
 [dependency-groups]
 dev = [
